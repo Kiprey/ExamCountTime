@@ -10,6 +10,7 @@ Widget::Widget(QWidget *parent) :
     //读取设置
     QSettings Settings("CountTime.ini", QSettings::IniFormat);
 
+    //读取有关字体设置
     QString FontName = Settings.value("FontName", QVariant("Arial")).toString();
     Settings.setValue("FontName", QVariant(FontName));
     int FontSize = Settings.value("FontSize", QVariant(30)).toInt();
@@ -62,17 +63,24 @@ Widget::Widget(QWidget *parent) :
     Seconds = TotalMSeconds % (60 * 1000) / 1000;
     MSeconds = TotalMSeconds % 1000;
 
-    //手动调整窗口大小，并调整窗口位置
+    //先将窗口移出屏幕
+    this->move(-1000, -1000);
+
+
+    //读取窗口位置
+    GeometryX = -1;
+    GeometryY = -1;
     RefreshLabelText();
     QRect ScreenGeometry = QGuiApplication::screens().first()->availableGeometry();
     QRect WidgetGeometry = this->geometry();
-    int GeometryX = Settings.value("GeometryX", QVariant(ScreenGeometry.width() - WidgetGeometry.width() - 50)).toInt();
+
+    GeometryX = Settings.value("GeometryX", QVariant(ScreenGeometry.width() - WidgetGeometry.width() - 50)).toInt();
     Settings.setValue("GeometryX", QVariant(GeometryX));
-    int GeometryY = Settings.value("GeometryY", QVariant(50)).toInt();
+
+    GeometryY = Settings.value("GeometryY", QVariant(50)).toInt();
     Settings.setValue("GeometryY", QVariant(GeometryY));
 
-    //设置窗口坐标
-    this->move(GeometryX, GeometryY);
+
 
     //创建并设置毫秒级精度的定时器
     Timer = new QTimer();
@@ -92,10 +100,35 @@ Widget::~Widget()
 void Widget::RefreshLabelText()
 {
     QString String = "高考倒计时\n%1d %2h %3m %4s %5";
+    String = String.arg(Days).arg(Hours).arg(Minutes).arg(Seconds).arg(MSeconds / 10);
+    Label->setText(String);
+    //调整各组件大小
+    Label->adjustSize();
+    this->adjustSize();
+
 
     if ((MSeconds -= 10) < 0)
     {
         MSeconds += 1000;
+
+        //每秒检测窗口是否超出屏幕
+        QRect ScreenGeometry = QGuiApplication::screens().first()->availableGeometry();
+        QRect WidgetGeometry = this->geometry();
+        int TempGeometryX;
+        int TempGeometryY;
+        if (GeometryX < 0 || GeometryX > ScreenGeometry.width() - WidgetGeometry.width())
+            TempGeometryX = ScreenGeometry.width() - WidgetGeometry.width() - 50;
+        else
+            TempGeometryX = GeometryX;
+
+        if (GeometryY < 0 || GeometryY > ScreenGeometry.height())
+            TempGeometryY = 50;
+        else
+            TempGeometryY = GeometryY;
+
+        //设置窗口坐标
+        this->move(TempGeometryX, TempGeometryY);
+
         if (--Seconds < 0)
         {
             Seconds += 60;
@@ -114,10 +147,6 @@ void Widget::RefreshLabelText()
             }
         }
     }
-    String = String.arg(Days).arg(Hours).arg(Minutes).arg(Seconds).arg(MSeconds / 10);
-    Label->setText(String);
-    //调整各组件大小
-    Label->adjustSize();
-    this->adjustSize();
+
 }
 

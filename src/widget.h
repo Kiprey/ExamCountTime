@@ -8,7 +8,6 @@
 #include <QTimer>
 #include <QSettings>
 #include <QScreen>
-#include <QDebug>
 
 namespace Ui {
 class Widget;
@@ -34,6 +33,9 @@ private:
     int Minutes;
     int Seconds;
     int MSeconds;
+
+    int GeometryX;
+    int GeometryY;
 
 private slots:
     void RefreshLabelText();
