@@ -2,7 +2,7 @@
 
 - 这是个很简单的考试倒计时软件
 - 使用C++与Qt框架编写
-- 如需下载，只要下载”ExamCountTime_ReleaseVersion.rar解压就好“
+- 如需下载，请前往[relese-1.0](https://github.com/Kiprey/ExamCountTime/releases/tag/1.0)下载
 
 ## 设置
 - 设置CountTime.ini
